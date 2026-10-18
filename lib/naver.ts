@@ -92,10 +92,13 @@ export function parseApartment(id: string, raw: unknown, rawAreas: unknown): Apa
   });
   if (!areas.length) throw new SourceError("SOURCE_FORMAT", "이 단지의 면적 정보를 확인하지 못했습니다.");
   const address = object(info.address);
+  const point = object(info.coordinates);
+  const lat = number(point?.yCoordinate), lng = number(point?.xCoordinate);
   const addressParts = address?.roadName ? [address.city, address.division, address.roadName] : [address?.city, address?.division, address?.sector, address?.jibun];
   return {
     id, name: info.name,
     address: addressParts.filter(p => typeof p === "string" && p).join(" ") || "주소 정보 확인 필요",
+    coordinates: lat !== null && lng !== null && lat >= 33 && lat <= 39.5 && lng >= 124 && lng <= 132 ? { lat, lng } : null,
     approvalDate: dateValue(info.useApprovalDate), households: number(info.totalHouseholdNumber),
     sourceUrl: `https://fin.land.naver.com/complexes/${id}?tab=complex-info`, areas,
   };

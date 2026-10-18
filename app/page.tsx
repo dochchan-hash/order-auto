@@ -4,6 +4,7 @@ import { ArrowRight, Building2, Check, ChevronDown, Copy, ExternalLink, Info, Ma
 import type { Apartment, Prices, SearchItem } from "@/lib/apartment";
 import { koreaToday, monthsBefore, pyeong, recentSales, won } from "@/lib/apartment";
 import { previewApartment, previewPrices } from "@/lib/preview-data";
+import { TravelTimes } from "@/components/travel-times";
 
 async function read<T>(url: string, signal?: AbortSignal): Promise<T> {
   const r = await fetch(url, { signal, cache: "no-store" });
@@ -27,6 +28,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [months, setMonths] = useState(6);
+  const [showTravel, setShowTravel] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
@@ -124,6 +126,7 @@ export default function Home() {
       {!loading && !error && prices && <>{sales.length ? <div className="latest-price"><span>가장 최근 계약금액</span><strong>{low === high ? won(high) : `${won(low)} ~ ${won(high)}`}</strong><p>{sales[0].date} 계약 · {latest.length > 1 ? `동일 날짜 ${latest.length}건` : `${sales[0].floor === null ? "층 정보 없음" : sales[0].floor + "층"}`}</p></div> : <><div className="no-sales"><span className="status-dot"/><h4>최근 매매 실거래 없음</h4><p>{monthsBefore(today, months)} ~ {today} 계약 기준</p></div><div className="market-box"><p className="market-label">대신, 현재 시세를 확인하세요</p><h4>매매 시세</h4>{prices.market ? <><strong>{won(prices.market.lowWon)} ~ {won(prices.market.highWon)}</strong><p>{prices.market.provider} · {prices.market.date} 기준</p><small>해당 면적의 시세이며 실제 계약금액과 다를 수 있습니다.</small></> : <><strong className="no-market">{prices.marketError ? "시세 조회 실패" : "시세 정보 없음"}</strong><p>{prices.marketError || "이 면적의 시세가 제공되지 않습니다."}</p></>}</div></>}
       {sales.length > 0 && <div className="trade-table-wrap"><div className="table-heading"><h4>최근 {months}개월 거래 내역</h4><span>{sales.length}건</span></div><table><thead><tr><th scope="col">계약일</th><th scope="col">층</th><th scope="col">매매금액</th></tr></thead><tbody>{sales.map((trade, index) => <tr key={`${trade.date}-${index}`}><td>{trade.date}</td><td>{trade.floor === null ? "—" : `${trade.floor}층`}</td><td>{won(trade.priceWon)}</td></tr>)}</tbody></table></div>}<div className="data-notes"><p><ShieldCheck size={14}/>취소된 거래를 제외한 매매 계약 기준입니다.</p>{prices.typeNote && <p><Info size={14}/>{prices.typeNote}</p>}<p>조회 시각 {new Date(prices.checkedAt).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}</p></div></>}
       </section></div></section>}
+      {apartment && <TravelTimes apartment={apartment} enabled={showTravel} onToggle={() => setShowTravel(v => !v)}/>}
       {!apartment && error && <div className="error-card" role="alert"><Info size={24}/><h3>단지 조회를 완료하지 못했어요</h3><p>{error}</p><button className="outline-button" onClick={() => input.current?.focus()}>아파트 다시 검색</button></div>}
       <footer><span className="footer-brand">아파트 한눈에</span><p>자료 출처 네이버 부동산 · 실거래가는 매매 기준 · 최근 기준 기본 6개월</p><span>정확한 정보로, 더 편한 리서치.</span></footer>
     </main>

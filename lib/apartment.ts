@@ -2,6 +2,7 @@ export type Apartment = {
   id: string;
   name: string;
   address: string;
+  coordinates: { lat: number; lng: number } | null;
   approvalDate: string | null;
   households: number | null;
   sourceUrl: string;

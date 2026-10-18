@@ -3,6 +3,7 @@ import { koreaToday, monthsBefore } from "./apartment";
 // Fictional records are available only through the explicitly labelled preview button.
 export const previewApartment: Apartment = {
   id: "preview", name: "한눈에 예시 아파트", address: "화면 확인을 위한 가상 단지입니다",
+  coordinates: null,
   approvalDate: "2015-09-18", households: 720, sourceUrl: "https://fin.land.naver.com/",
   areas: [
     { id: "59A", label: "59A", supplyM2: 81.32, exclusiveM2: 59.94 },

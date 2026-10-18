@@ -62,10 +62,11 @@ test('HTML, bad JSON and network failures cannot become no sales', async () => {
   await assert.rejects(naverGet('/test-network',{},async()=>{throw new Error('offline')}),{code:'SOURCE_UNAVAILABLE'});
 });
 test('actual Naver field names, date validation and won values are preserved', () => {
-  const apt = parseApartment('23758',{name:'아름마을신한미지엔',type:'A01',address:{city:'경기도',division:'화성시 병점구',roadName:'효행로707번길 7'},useApprovalDate:'20060929',totalHouseholdNumber:708},[{number:1,name:'94',supplyArea:94.95,exclusiveArea:69.93}]);
+  const apt = parseApartment('23758',{name:'아름마을신한미지엔',type:'A01',address:{city:'경기도',division:'화성시 병점구',roadName:'효행로707번길 7'},coordinates:{xCoordinate:127.007246,yCoordinate:37.200851},useApprovalDate:'20060929',totalHouseholdNumber:708},[{number:1,name:'94',supplyArea:94.95,exclusiveArea:69.93}]);
   assert.equal(apt.approvalDate,'2006-09-29');
   assert.equal(apt.areas[0].exclusiveM2,69.93);
   assert.equal(apt.address,'경기도 화성시 병점구 효행로707번길 7');
+  assert.deepEqual(apt.coordinates,{lat:37.200851,lng:127.007246});
   const trades = parseTrades([{tradeDate:'2026-10-03',floor:5,dealPrice:270000000,isDelete:false},{tradeDate:'2026-09-29',floor:4,dealPrice:250000000,isDelete:true}]);
   assert.equal(won(trades[0].priceWon),'2억 7,000만원');
   assert.equal(recentSales(trades,6,'2026-10-19').length,1);
