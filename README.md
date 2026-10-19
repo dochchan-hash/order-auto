@@ -1,4 +1,4 @@
-# 아파트 한눈에
+# order-auto · 아파트 한눈에
 
 브라우저에서 단지명 검색 후 공급·전용면적(평/m² 전환), 평형·타입, 사용승인일, 최근 매매 실거래를 조회합니다. 평형 카드 위의 평/m² 버튼으로 면적 표시 단위를 선택하며, 타입명과 선택한 평형은 유지됩니다.
 
@@ -32,9 +32,11 @@
 Node.js 22.13 이상.
 
 ```text
-node scripts/run-framework.mjs dev
-node node_modules/typescript/bin/tsc --noEmit
-node --experimental-transform-types --test tests/domain.test.mjs tests/travel.test.mjs
+npm run install:ci
+npm run dev
+npm test
+npm run typecheck
+npm run build
 ```
 
 로컬: http://127.0.0.1:5173
@@ -44,6 +46,8 @@ node --experimental-transform-types --test tests/domain.test.mjs tests/travel.te
 검증 캡처: `/verification`
 
 배포에는 Sites 소스 동기화·아카이브 흐름을 사용하며 `.openai/hosting.json`의 project_id를 보존합니다. 저장소 자격증명과 익명 세션 토큰은 파일에 저장하지 않습니다.
+
+GitHub 저장소는 소스 보관용이며 웹앱 실행과 접근 권한은 위 배포 주소에서 별도로 관리합니다. 의존성 설치·빌드 결과물, 로컬 진단 자료와 자격증명은 업로드하지 않습니다.
 
 ## 확인한 자료 (2026-10-19)
 
