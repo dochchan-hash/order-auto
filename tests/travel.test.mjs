@@ -30,22 +30,27 @@ test('successful driving requests deduplicate and cache actual fetch time; failu
   const failed=await drivingTime(branch,{lat:37.4,lng:127.2},async()=>new Response('<html>error</html>',{status:503}));
   assert.equal(failed.durationSeconds,null); assert.equal(failed.distanceMeters,null); assert.match(failed.error,/가져오지/);
 });
-test('official Seoul/Gyeonggi list has seven unique, located branches and Ilsan caveat',()=>{
-  assert.equal(lemonBranches.length,7);
-  assert.equal(new Set(lemonBranches.map(b=>b.id)).size,7);
+test('Naver Seoul/Gyeonggi matches have eight unique branches including Eunpyeong and no Incheon',()=>{
+  assert.equal(lemonBranches.length,8);
+  assert.equal(new Set(lemonBranches.map(b=>b.id)).size,8);
+  assert.equal(new Set(lemonBranches.map(b=>b.sourceUrl)).size,8);
   for(const branch of lemonBranches) {
     assert.ok(branch.coordinates.lat>37&&branch.coordinates.lat<38);
     assert.ok(branch.coordinates.lng>126&&branch.coordinates.lng<128);
-    assert.match(branch.sourceUrl,/^https:\/\/lemon-house\.kr\/(se|gg)_location\d+$/);
+    assert.match(branch.sourceUrl,/^https:\/\/map\.naver\.com\/p\/entry\/place\/\d+$/);
+    assert.equal(isSeoulGyeonggi(branch.address),true);
   }
-  assert.match(lemonBranches.find(b=>b.id==='ilsan').note,/준비중/);
+  const eunpyeong=lemonBranches.find(b=>b.id==='eunpyeong');
+  assert.ok(eunpyeong);
+  assert.match(eunpyeong.sourceUrl,/2063583149$/);
+  assert.match(eunpyeong.address,/은평구 통일로 1010/);
 });
 test('duration and explicit driving link preserve branch to apartment direction',()=>{
   assert.equal(durationLabel(40),'1분 미만');
   assert.equal(durationLabel(600),'10분');
   assert.equal(durationLabel(3600),'1시간');
   assert.equal(durationLabel(3661),'1시간 1분');
-  const branch=lemonBranches.find(b=>b.id==='mapo');
+  const branch={...lemonBranches.find(b=>b.id==='mapo'),coordinates:{lat:37.543569639742984,lng:126.95402269848931}};
   const apt={name:'테스트, A/1',coordinates:{lat:37.200851,lng:127.007246}};
   const link=carRouteLink(branch,apt);
   assert.ok(link.startsWith('https://map.naver.com/p/directions/3zgELN,2AL5kY,'));

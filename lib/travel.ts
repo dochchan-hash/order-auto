@@ -6,7 +6,6 @@ export type LemonBranch = {
   address: string;
   coordinates: { lat: number; lng: number };
   sourceUrl: string;
-  note?: string;
 };
 export type Journey = {
   branchId: string;
