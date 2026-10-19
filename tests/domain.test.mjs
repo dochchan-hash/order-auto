@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { monthsBefore, recentSales, koreaToday, pyeong, won } from '../lib/apartment.ts';
+import { formatArea, monthsBefore, recentSales, koreaToday, pyeong, won } from '../lib/apartment.ts';
 import { naverGet, parseSearch, parseApartment, parseTrades, parseMarket, dateValue, SourceError } from '../lib/naver.ts';
 import { maskToken, unmaskToken } from '../lib/naver-session.ts';
 
@@ -34,6 +34,12 @@ test('money uses won explicitly; conversion is rounded for display only', () => 
   assert.equal(won(580000000),'5억 8,000만원');
   assert.equal(won(700000000),'7억원');
   assert.equal(pyeong(84.97),'25.7');
+});
+test('area unit display rounds pyeong and preserves supplied square metres', () => {
+  assert.equal(formatArea(94.95, 'pyeong'), '28.7평');
+  assert.equal(formatArea(69.93, 'pyeong'), '21.2평');
+  assert.equal(formatArea(94.95, 'm2'), '94.95m²');
+  assert.equal(formatArea(113.1, 'm2'), '113.1m²');
 });
 test('unknown search shape is an error, only actual empty list is no matches', () => {
   assert.deepEqual(parseSearch({list:[]}),[]);

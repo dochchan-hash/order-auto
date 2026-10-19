@@ -41,6 +41,12 @@ export function pyeong(m2: number) {
   return (m2 / 3.305785).toFixed(1);
 }
 
+export type AreaUnit = "pyeong" | "m2";
+
+export function formatArea(m2: number, unit: AreaUnit) {
+  return unit === "pyeong" ? `${pyeong(m2)}평` : `${m2}m²`;
+}
+
 export function won(value: number) {
   const man = Math.round(value / 10000);
   const eok = Math.floor(man / 10000);
