@@ -12,6 +12,7 @@ export type Journey = {
   durationSeconds: number | null;
   distanceMeters: number | null;
   checkedAt: string;
+  nearby?: boolean;
   error?: string;
 };
 export type TravelResult = { routes: Journey[]; provider: string };
@@ -26,11 +27,11 @@ export function durationLabel(seconds: number) {
   return [minutes >= 60 ? `${Math.floor(minutes / 60)}시간` : "", minutes % 60 ? `${minutes % 60}분` : ""].filter(Boolean).join(" ");
 }
 
-export function carRouteLink(branch: LemonBranch, apartment: Apartment) {
+export function routeLink(branch: LemonBranch, apartment: Apartment, mode: "car" | "walk" = "car") {
   if (!apartment.coordinates) return null;
   const from = `${coordinate(branch.coordinates.lng)},${coordinate(branch.coordinates.lat)},${encodeURIComponent(`레몬하우스 ${branch.name}`)},,SIMPLE_POI`;
   const to = `${coordinate(apartment.coordinates.lng)},${coordinate(apartment.coordinates.lat)},${encodeURIComponent(apartment.name)},,SIMPLE_POI`;
-  return `https://map.naver.com/p/directions/${from}/${to}/-/car`;
+  return `https://map.naver.com/p/directions/${from}/${to}/-/${mode}`;
 }
 
 function coordinate(value: number) {

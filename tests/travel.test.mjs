@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { lemonBranches } from '../lib/lemon-branches.ts';
-import { isSeoulGyeonggi, durationLabel, carRouteLink } from '../lib/travel.ts';
+import { isSeoulGyeonggi, durationLabel, routeLink } from '../lib/travel.ts';
 import { parseDriving, drivingTime } from '../lib/driving.ts';
 
 test('feature is restricted to Seoul and Gyeonggi, never a similarly named street',()=>{
@@ -12,9 +12,36 @@ test('Naver recommendation is selected explicitly, milliseconds and meters are p
   const raw={code:0,route:{'2,1,0,0,0,0':[{summary:{duration:1,distance:2,mainOption:2,subOption:1}}],'3,1,0,0,0,0':[{summary:{duration:6083778,distance:48491,mainOption:3,subOption:1}}]}};
   assert.deepEqual(parseDriving(raw),{durationSeconds:6083.778,distanceMeters:48491});
   assert.equal(durationLabel(parseDriving(raw).durationSeconds),'1시간 41분');
-  assert.throws(()=>parseDriving({code:1,route:raw.route}));
+  assert.throws(()=>parseDriving({code:3,route:raw.route}));
   assert.throws(()=>parseDriving({code:0,route:{}}));
   assert.throws(()=>parseDriving({code:0,route:{'3,1,0,0,0,0':[{summary:{duration:-1,distance:10,mainOption:3,subOption:1}}]}}));
+});
+
+test('same-position response is nearby, without inventing a driving or walking duration',async()=>{
+  const raw={code:1,message:'출발지와 도착지가 동일합니다. 확인 후 다시 지정해주세요.'};
+  assert.deepEqual(parseDriving(raw),{durationSeconds:null,distanceMeters:null,nearby:true});
+  const branch=lemonBranches.find(b=>b.id==='mapo');
+  const route=await drivingTime(branch,branch.coordinates,async()=>Response.json(raw));
+  assert.equal(route.nearby,true);
+  assert.equal(route.durationSeconds,null);
+  assert.equal(route.distanceMeters,null);
+  assert.equal(route.error,undefined);
+});
+
+test('nearby coordinates keep real driving routes and do not disguise source failures',async()=>{
+  const branch=lemonBranches.find(b=>b.id==='mapo');
+  const goal={lat:37.54357,lng:126.95405};
+  const route=await drivingTime(branch,goal,async()=>Response.json({code:0,route:{'3,1,0,0,0,0':[{summary:{duration:79947,distance:330,mainOption:3,subOption:1}}]}}));
+  assert.equal(route.durationSeconds,79.947);
+  assert.equal(route.distanceMeters,330);
+  assert.equal(route.nearby,undefined);
+  const failureGoal={...goal,lng:126.95406};
+  for(const fetcher of [async()=>new Response('unavailable',{status:503}),async()=>Response.json({code:3}),async()=>Response.json({code:0,route:{}})]) {
+    const failed=await drivingTime(branch,failureGoal,fetcher);
+    assert.equal(failed.nearby,undefined);
+    assert.equal(failed.durationSeconds,null);
+    assert.ok(failed.error);
+  }
 });
 test('successful driving requests deduplicate and cache actual fetch time; failures never become zero minutes',async()=>{
   let calls=0;
@@ -52,10 +79,12 @@ test('duration and explicit driving link preserve branch to apartment direction'
   assert.equal(durationLabel(3661),'1시간 1분');
   const branch={...lemonBranches.find(b=>b.id==='mapo'),coordinates:{lat:37.543569639742984,lng:126.95402269848931}};
   const apt={name:'테스트, A/1',coordinates:{lat:37.200851,lng:127.007246}};
-  const link=carRouteLink(branch,apt);
+  const link=routeLink(branch,apt);
   assert.ok(link.startsWith('https://map.naver.com/p/directions/3zgELN,2AL5kY,'));
   assert.ok(link.includes('/3ziTec,2AwHLM,'));
   assert.ok(link.endsWith('/-/car'));
   assert.ok(link.includes(encodeURIComponent(apt.name)));
-  assert.equal(carRouteLink(branch,{...apt,coordinates:null}),null);
+  assert.equal(routeLink(branch,apt,'walk'),link.replace(/\/car$/,'/walk'));
+  assert.equal(routeLink(branch,{...apt,coordinates:null}),null);
+  assert.equal(routeLink(branch,{...apt,coordinates:null},'walk'),null);
 });

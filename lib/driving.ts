@@ -9,6 +9,8 @@ let limitedUntil = 0;
 
 export function parseDriving(raw: unknown) {
   const root = object(raw);
+  // Naver returns code 1 when both points resolve to the same location.
+  if (root?.code === 1) return { durationSeconds: null, distanceMeters: null, nearby: true };
   const routes = object(root?.route)?.["3,1,0,0,0,0"];
   const summary = Array.isArray(routes) ? object(object(routes[0])?.summary) : null;
   if (root?.code !== 0 || !summary || summary.mainOption !== 3 || summary.subOption !== 1 ||
