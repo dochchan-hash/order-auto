@@ -34,7 +34,7 @@ export function TravelTimes({ apartment, enabled, onToggle }: { apartment: Apart
     .toSorted((a, b) => (a.route?.nearby ? -1 : a.route?.durationSeconds ?? Infinity) - (b.route?.nearby ? -1 : b.route?.durationSeconds ?? Infinity));
 
   return <section className="travel-panel" aria-label="레몬하우스 지점 차량 이동시간">
-    <div className="travel-heading"><div><p className="eyebrow">LEMONHOUSE · DRIVING TIME</p><h3><Car size={20}/>레몬하우스 지점별 이동시간</h3><p>서울·경기 {lemonBranches.length}개 지점 → {apartment.name}</p></div>
+    <div className="travel-heading"><div><p className="eyebrow">LEMONHOUSE · DRIVING TIME</p><h3><Car size={20}/>레몬하우스 지점별 이동시간</h3><p>서울·경기·인천·충청권 {lemonBranches.length}개 지점 → {apartment.name}</p></div>
       <button type="button" role="switch" aria-label="레몬하우스 차량 이동시간 표시" aria-checked={enabled && eligible} disabled={!eligible} className="travel-switch" onClick={onToggle}><span/>{enabled && eligible ? "켜짐" : "꺼짐"}</button>
     </div>
     {!eligible ? <p className="travel-off">서울·경기 지역의 실제 아파트에서 사용할 수 있습니다.</p> : !enabled ? <p className="travel-off">기능을 켜면 지점에서 이 아파트까지의 차량 예상 소요시간을 확인합니다.</p> : <>
@@ -46,7 +46,7 @@ export function TravelTimes({ apartment, enabled, onToggle }: { apartment: Apart
           <td>{waiting ? <span role="status">조회 중…</span> : route?.nearby ? <><strong>가까운 거리</strong><small>차량 경로 없음 · 도보 확인</small></> : route?.durationSeconds !== null && route?.durationSeconds !== undefined ? <strong>{durationLabel(route.durationSeconds)}</strong> : <span className="travel-error">조회 실패</span>}{route?.error && <small>{route.error}</small>}{route && <small>{new Date(route.checkedAt).toLocaleTimeString("ko-KR", {timeZone:"Asia/Seoul",hour:"2-digit",minute:"2-digit"})} 조회</small>}</td>
           <td>{route?.distanceMeters === null || route?.distanceMeters === undefined ? "—" : `${(route.distanceMeters / 1000).toFixed(1)}km`}</td><td>{link && <a className="outline-button" href={link} target="_blank" rel="noreferrer">{route?.nearby ? "도보 경로 보기" : "지도 보기"} <ExternalLink size={12}/></a>}</td></tr>;
       })}</tbody></table></div>
-      <p className="travel-footnote">{data?.provider ? `${data.provider} · ` : ""}조회 시점의 예상 시간이며 교통상황·진입로에 따라 달라집니다. 네이버가 출발·도착 지점을 같은 위치로 판정하면 가까운 거리로 안내하며 도보 경로를 연결합니다. 지점명·주소·지도 위치는 네이버 검색·플레이스(2026-10-19 확인) 기준입니다.</p>
+      <p className="travel-footnote">{data?.provider ? `${data.provider} · ` : ""}조회 시점의 예상 시간이며 교통상황·진입로에 따라 달라집니다. 네이버가 출발·도착 지점을 같은 위치로 판정하면 가까운 거리로 안내하며 도보 경로를 연결합니다. 지점명·주소·지도 위치는 네이버 검색·플레이스 기준입니다(서울 2026-10-19, 경기·인천·충청권 2026-11-17 확인).</p>
     </>}
   </section>;
 }
